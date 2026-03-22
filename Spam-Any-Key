@@ -1,0 +1,22 @@
+Gui, +AlwaysOnTop +Disabled -SysMenu +Owner
+Gui, Add, Text,, Press the key you want to repeat
+Gui, Show, NoActivate, SpamKey Script
+
+hook := InputHook()
+hook.KeyOpt("{All}", "NS")
+hook.OnKeyDown := Func("spamKey")
+hook.Start()
+
+spamKey(inputHook, vk, sc) {
+    inputHook.Stop()
+    Gui, Destroy
+    key := "{" . Format("vk{:x}sc{:x}", vk, sc) . "}"
+    pause
+    Loop {
+        SendInput % key
+        Sleep, 50
+    }
+}
+
+F1::
+pause
