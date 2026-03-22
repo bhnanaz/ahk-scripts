@@ -1,0 +1,11 @@
+#SingleInstance Force
+
+F1::
+    Loop, 5 {
+        Send, {Right}
+        Sleep, 1
+    }
+    Send, {Space}
+return
+
+F2::ExitApp
