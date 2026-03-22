@@ -1,0 +1,117 @@
+global stop := false
+global delay := 200         ; Default input delay (ms)
+global startDelay := 2000   ; Default start delay (ms)
+global keyMode := "WASD"    ; Default key mode: WASD
+global useKeyDelay := false ; Default: key delay OFF
+
+; Main GUI
+Gui, Add, Text,, Enter sequence (U/D/L/R):
+Gui, Add, Edit, vKeyInput w200
+Gui, Add, Button, gStartSequence, Start
+Gui, Add, Button, gSetStartDelay, Set Start Delay
+Gui, Add, Button, gSetDelay, Set Input Delay
+Gui, Add, DropDownList, vKeyModeChoice w100 Choose1, WASD|Arrow Keys
+Gui, Add, Checkbox, vKeyDelayOption, Activate key hold (necessary for certain games)
+Gui, Add, Button, gShowHelp, Help
+Gui, Show,, Arrow Key Presser
+Return
+
+; Emergency quit with Q
+~q::
+stop := true
+Return
+
+; Start sending keys
+StartSequence:
+stop := false
+Gui, Submit, NoHide
+keyMode := KeyModeChoice
+useKeyDelay := KeyDelayOption
+
+if (useKeyDelay)
+    SetKeyDelay, 0, 50
+else
+    SetKeyDelay, -1
+
+Sleep, startDelay
+
+Loop, Parse, KeyInput
+{
+    if (stop)
+        break
+
+    char := Trim(A_LoopField)
+    if (char = "")
+        continue
+
+    StringUpper, char, char
+
+    if (keyMode = "Arrow Keys") {
+        if (char = "U")
+            Send, {Up}
+        else if (char = "D")
+            Send, {Down}
+        else if (char = "L")
+            Send, {Left}
+        else if (char = "R")
+            Send, {Right}
+    }
+    else if (keyMode = "WASD") {
+        if (char = "U")
+            Send, w
+        else if (char = "D")
+            Send, s
+        else if (char = "L")
+            Send, a
+        else if (char = "R")
+            Send, d
+    }
+
+    Sleep, delay
+}
+
+GuiControl,, KeyInput,
+Return
+
+; Set start delay
+SetStartDelay:
+InputBox, newStartDelay, Set Start Delay, Enter delay before starting in ms (e.g. 2000), , 200, 120
+if ErrorLevel
+    Return
+if (newStartDelay > 0)
+    startDelay := newStartDelay
+else
+    MsgBox, Invalid start delay. Must be a positive number.
+Return
+
+; Set input delay
+SetDelay:
+InputBox, newDelay, Set Input Delay, Enter delay between keys in ms (e.g. 200), , 200, 120
+if ErrorLevel
+    Return
+if (newDelay > 0)
+    delay := newDelay
+else
+    MsgBox, Invalid delay. Must be a positive number.
+Return
+
+; Help window
+ShowHelp:
+Gui, 2:Add, Text,, Instructions:
+Gui, 2:Add, Text,, 1. Find Guide
+Gui, 2:Add, Text,, 2. Copy Steps From Guide
+Gui, 2:Add, Text,, 3. Paste Steps In Script
+Gui, 2:Add, Text,, 4. Adjust Start Delay / Input Delay (2000ms / 200ms by default)
+Gui, 2:Add, Text,, 5. Select WASD or Arrow Keys
+Gui, 2:Add, Text,, 6. Start and Focus Game Window
+Gui, 2:Add, Text,, 7. For Emergency Stop Press Q
+Gui, 2:Add, Text,, 8. Activate key hold if necessary (Some games don’t register keystrokes if they’re sent too quickly. SetKeyDelay 0,50 makes the key stay pressed longer so the game can detect it).
+Gui, 2:Show,, Help
+Return
+
+GuiClose:
+ExitApp
+
+2GuiClose:
+Gui, 2:Destroy
+Return
