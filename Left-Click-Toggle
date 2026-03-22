@@ -1,0 +1,16 @@
+toggle := false
+
+F1::
+toggle := !toggle
+if (toggle)
+{
+    Send, {LButton down}  ; Hold down left click
+}
+else
+{
+    Send, {LButton up}    ; Release left click
+}
+return
+
+F2::
+ExitApp  ; Stop the script
