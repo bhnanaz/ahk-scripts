@@ -1,0 +1,29 @@
+global keystrokes := ""
+
+~W::Record("U")
+~S::Record("D")
+~A::Record("L")
+~D::Record("R")
+~Up::Record("U")
+~Down::Record("D")
+~Left::Record("L")
+~Right::Record("R")
+~Z::Record("!")
+~Space::Record("_")
+
+F8::Release()
+F9::Clear()
+F10::ExitApp
+
+Record(X) {
+	keystrokes := keystrokes X
+}
+
+Release() {
+	ClipBoard := keystrokes
+	Clear()
+}
+
+Clear() {
+	keystrokes := ""
+}
