@@ -1,0 +1,97 @@
+#SingleInstance Force
+
+global remaps := {}
+global keyCount := 0
+
+; Set initial window size
+Gui, +Resize
+Gui, Add, Button, x10 y10 w120 h40 gAddKey, Add Key
+
+Gui, Show, w420 h300, Key Remapper by nana
+return
+
+; -------------------------
+; ADD KEY
+; -------------------------
+AddKey:
+    ToolTip, Press a key to add...
+
+    ih := InputHook("L1")
+    ih.KeyOpt("{All}", "E")
+    ih.Start()
+    ih.Wait()
+
+    ToolTip
+
+    key := ih.EndKey
+    if (key = "")
+        return
+
+    if (remaps.HasKey(key))
+        return
+
+    remaps[key] := ""
+    keyCount++
+
+    ; Grid layout
+    cols := 5
+    btnW := 70
+    btnH := 40
+    spacing := 10
+
+    col := Mod(keyCount-1, cols)
+    row := Floor((keyCount-1) / cols)
+
+    x := 10 + col * (btnW + spacing)
+    y := 70 + row * (btnH + spacing)
+
+    btnName := "KeyBtn_" key
+
+    Gui, Add, Button, % "x" x " y" y " w" btnW " h" btnH " gKeyButton v" btnName, %key%
+
+    ; --- EXPAND WINDOW IF NEEDED ---
+    newHeight := y + btnH + 20
+    Gui, Show, % "AutoSize"
+return
+
+; -------------------------
+; CLICK BUTTON → REMAP
+; -------------------------
+KeyButton:
+    btnName := A_GuiControl
+    key := SubStr(btnName, 8)
+
+    ToolTip, Press key to map "%key%" to...
+
+    ih := InputHook("L1")
+    ih.KeyOpt("{All}", "E")
+    ih.Start()
+    ih.Wait()
+
+    ToolTip
+
+    targetKey := ih.EndKey
+    if (targetKey = "")
+        return
+
+    if (remaps[key] != "") {
+        Hotkey, % "*" . key, Off
+    }
+
+    remaps[key] := targetKey
+
+    Hotkey, % "*" . key, HandleRemap, On
+
+    GuiControl,, %btnName%, % key " → " targetKey
+return
+
+; -------------------------
+; HANDLE REMAP
+; -------------------------
+HandleRemap:
+    key := SubStr(A_ThisHotkey, 2)
+    Send, % "{" remaps[key] "}"
+return
+
+GuiClose:
+ExitApp
